@@ -1,0 +1,3 @@
+-std=c++11
+-Wall
+-I/opt/homebrew/opt/libpng/include/libpng16

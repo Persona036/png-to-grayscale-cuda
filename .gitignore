@@ -1,0 +1,20 @@
+# Build outputs
+png_parser
+*.exe
+*.out
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.pdb
+*.ilk
+
+# Build directories
+build/
+cmake-build-*/
+
+# OS cruft
+.DS_Store
