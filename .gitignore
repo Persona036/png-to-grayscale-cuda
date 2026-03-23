@@ -18,3 +18,6 @@ cmake-build-*/
 
 # OS cruft
 .DS_Store
+
+#png output
+output.png

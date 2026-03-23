@@ -6,22 +6,23 @@
 
 const uint8_t PNG_SIGNATURE[8] = {137, 80, 78, 71, 13, 10, 26, 10};
 
-__global__ void colortoGrayscaleConversion(unsigned char *Pout, unsigned char *Pin, int width, int height) {
-    int col = blockIdx.x * blockDim.x + threadIdx.x;
-    int row = blockIdx.y * blockDim.y + threadIdx.y;
+__global__ void colortoGrayscaleConversion(unsigned char *Pout,
+                                           unsigned char *Pin, int width,
+                                           int height) {
+  int col = blockIdx.x * blockDim.x + threadIdx.x;
+  int row = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (col < width && row < height) {
-        int grayOffset = row*width + col;
+  if (col < width && row < height) {
+    int grayOffset = row * width + col;
 
-        int rgbOffset = grayOffset * 3;
+    int rgbOffset = grayOffset * 3;
 
-        unsigned char r = Pin[rgbOffset];
-        unsigned char g = Pin[rgbOffset + 1];
-        unsigned char b = Pin[rgbOffset + 2];
+    unsigned char r = Pin[rgbOffset];
+    unsigned char g = Pin[rgbOffset + 1];
+    unsigned char b = Pin[rgbOffset + 2];
 
-
-        Pout[grayOffset] = 0.21f*r + 0.71f*g +0.07f*b;
-    }
+    Pout[grayOffset] = 0.21f * r + 0.71f * g + 0.07f * b;
+  }
 }
 
 png_bytep *read_png_rgb(FILE *fp, int *width, int *height) {
@@ -60,7 +61,8 @@ png_bytep *read_png_rgb(FILE *fp, int *width, int *height) {
   return color_data;
 }
 
-void write_png_gray(const char *filename, uint8_t *gray_data, int width, int height) {
+void write_png_gray(const char *filename, uint8_t *gray_data, int width,
+                    int height) {
   FILE *fp = fopen(filename, "wb");
   if (!fp) {
     fprintf(stderr, "ERROR: Could not open %s for writing\n", filename);
@@ -100,7 +102,7 @@ int main(int argc, char *argv[]) {
 
   fread(file_signature, sizeof(file_signature), 1, input_file);
 
-  for (int i = 0; i < sizeof(file_signature); i++) {
+  for (size_t i = 0; i < sizeof(file_signature); i++) {
     printf("%u ", file_signature[i]);
   }
   printf("\n");
@@ -118,16 +120,15 @@ int main(int argc, char *argv[]) {
   png_bytep *color_data = read_png_rgb(input_file, &width, &height);
 
   printf("Image: %dx%d\n", width, height);
-  printf("First pixel RGB: (%d, %d, %d)\n", color_data[0][0],
-         color_data[0][1], color_data[0][2]);
+  printf("First pixel RGB: (%d, %d, %d)\n", color_data[0][0], color_data[0][1],
+         color_data[0][2]);
 
   // PNG data is now RGB, accessible via color_data[y][x * 3 + color_value]
   // with color_value being 0, 1 or 2 depending on which color you want to
   // access
 
   // As required by CUDA, 2D arrays have to be flattened to 1D
-  uint8_t *flat_data =
-      (uint8_t *)malloc(height * width * 3 * sizeof(uint8_t));
+  uint8_t *flat_data = (uint8_t *)malloc(height * width * 3 * sizeof(uint8_t));
 
   // copy entire row of data per y value
   for (int y = 0; y < height; y++) {
@@ -157,7 +158,8 @@ int main(int argc, char *argv[]) {
   dim3 gridDim((width + blockDim.x - 1) / blockDim.x,
                (height + blockDim.y - 1) / blockDim.y);
 
-  colortoGrayscaleConversion<<<gridDim, blockDim>>>(d_gray, d_rgb, width, height);
+  colortoGrayscaleConversion<<<gridDim, blockDim>>>(d_gray, d_rgb, width,
+                                                    height);
   cudaDeviceSynchronize();
 
   uint8_t *gray_data = (uint8_t *)malloc(gray_size);

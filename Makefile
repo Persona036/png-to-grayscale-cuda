@@ -7,7 +7,7 @@ png_parser: png_parse.cu
 	$(NVCC) $(NVCCFLAGS) $(PNG_CFLAGS) -o png_parser png_parse.cu $(PNG_LIBS)
 
 run: png_parser
-	./png_parser PNG_transparency_demonstration.png
+	./png_parser fish.png
 
 clean:
 	rm -f png_parser
